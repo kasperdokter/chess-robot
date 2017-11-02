@@ -44,65 +44,65 @@ tu = 0.9   # time to close the grabber
 def set_px(a):
     global px
     px = a
-	return
+    return
 	
 def set_sx(a):
     global sx
     sx = a
-	return
+    return
 	
 def set_dx(a):
     global dx
     dx = a
-	return
+    return
 	
 	
 def set_py(a):
     global py
     py = a
-	return
+    return
 	
 def set_sy(a):
     global sy
     sy = a
-	return
+    return
 	
 def set_dy(a):
     global py
     dy = a
-	return
+    return
 	
 	
 def set_pz(a):
     global pz
     pz = a
-	return
+    return
 	
 def set_sz(a):
     global sz
     sz = a
-	return
+    return
 	
 def set_dz(a):
     global dz
     dz = a
-	return
+    return
 	
 def set_tz(a):
     global tz
     tz = a
-	return
+    return
 	
 	
 def set_pu(a):
     global pu
     pu = a
-	return
+    return
 	
 def set_tu(a):
     global tu
     tu = a
-	return
+    return
 	
 
 #########################  Functions for robot movement  #################################
@@ -123,48 +123,48 @@ def initialize():
 	
 def moveto(x,y):
     # moves the robot to square (x,y) in {0,...,7}^2 = {a,...,h}x{1,...,8}
-	BP.set_motor_position(BP.PORT_C, x * dx)
-	BP.set_motor_position(BP.PORT_B, y * dy)
-	return
+    BP.set_motor_position(BP.PORT_C, x * dx)
+    BP.set_motor_position(BP.PORT_B, y * dy)
+    return
 
 def up():
     # lift the grabber
-	BP.set_motor_position(BP.PORT_A, 0)
-	time.sleep(tz)
-	return
+    BP.set_motor_position(BP.PORT_A, 0)
+    time.sleep(tz)
+    return
 	
 def down():
-	# lower the grabber
-	BP.set_motor_position(BP.PORT_A, dz)
-	time.sleep(tz)
-	return
+    # lower the grabber
+    BP.set_motor_position(BP.PORT_A, dz)
+    time.sleep(tz)
+    return
 	
 def close():
     # close the grabber
-	BP.set_motor_power(BP.PORT_D, pu)
-	time.sleep(tu)
-	BP.set_motor_power(BP.PORT_D, 0)
+    BP.set_motor_power(BP.PORT_D, pu)
+    time.sleep(tu)
+    BP.set_motor_power(BP.PORT_D, 0)
     return
 
 def open():
     # open the grabber
-	BP.set_motor_power(BP.PORT_D, -pu)
-	time.sleep(tu)
-	BP.set_motor_power(BP.PORT_D, 0)
+    BP.set_motor_power(BP.PORT_D, -pu)
+    time.sleep(tu)
+    BP.set_motor_power(BP.PORT_D, 0)
     return
 	
 def grab():
     # picks up a piece at the current position
     down()
-	close()
-	up()
-	return
+    close()
+    up()
+    return
 
 def drop():
     # drops a piece at the current position
-	down()
-	open()
-	up()
+    down()
+    open()
+    up()
     return
 
 
@@ -173,16 +173,16 @@ def drop():
 try:
 
     if BP.get_voltage_battery() < 7:
-        print("Battery voltage is too low (" + str(BP.get_voltage_battery())  + "V). Exiting.") )
+        print("Battery voltage is too low (" + str(BP.get_voltage_battery())  + "V). Exiting.")
         SafeExit()
 		
     while True:
         c = str(raw_input("> "))
-		try:
+        try:
             eval(c)
-		except Exception as error:
-		    print(error)
-		time.sleep(0.02) # delay for 0.02 seconds (20ms) to reduce the Raspberry Pi CPU load.       
+        except Exception as error:
+            print(error)
+        time.sleep(0.02) # delay for 0.02 seconds (20ms) to reduce the Raspberry Pi CPU load.       
 
 except KeyboardInterrupt: # except the program gets interrupted by Ctrl+C on the keyboard.
     BP.reset_all()        # Unconfigure the sensors, disable the motors, and restore the LED to the control of the BrickPi3 firmware.
