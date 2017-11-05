@@ -17,7 +17,6 @@
 from __future__ import print_function # use python 3 syntax but make it compatible with python 2
 from __future__ import division       #                           ''
 
-import numpy as np  # import the mathematical functions
 import time         # import the time library for the sleep function
 import brickpi3     # import the BrickPi3 drivers
 
@@ -44,11 +43,13 @@ tu = 0.9   # time to close the grabber
 def set_px(a):
     global px
     px = a
+    BP.set_motor_limits(BP.PORT_C, pz, sz)
     return
 	
 def set_sx(a):
     global sx
     sx = a
+    BP.set_motor_limits(BP.PORT_C, pz, sz)
     return
 	
 def set_dx(a):
@@ -60,15 +61,17 @@ def set_dx(a):
 def set_py(a):
     global py
     py = a
+    BP.set_motor_limits(BP.PORT_B, py, sy)
     return
 	
 def set_sy(a):
     global sy
     sy = a
+    BP.set_motor_limits(BP.PORT_B, py, sy)
     return
 	
 def set_dy(a):
-    global py
+    global dy
     dy = a
     return
 	
@@ -76,11 +79,13 @@ def set_dy(a):
 def set_pz(a):
     global pz
     pz = a
+    BP.set_motor_limits(BP.PORT_A, pz, sz)
     return
 	
 def set_sz(a):
     global sz
     sz = a
+    BP.set_motor_limits(BP.PORT_A, pz, sz)
     return
 	
 def set_dz(a):
@@ -102,6 +107,30 @@ def set_pu(a):
 def set_tu(a):
     global tu
     tu = a
+    return
+
+########################################################################################
+
+
+def A(d):
+    try:
+        BP.set_motor_position(BP.PORT_A, BP.get_motor_encoder(BP.PORT_A) + d)
+    except IOError as error:
+        print(error)
+    return
+
+def B(d):
+    try:
+        BP.set_motor_position(BP.PORT_B, BP.get_motor_encoder(BP.PORT_B) + d)
+    except IOError as error:
+        print(error)
+    return
+
+def C(d):
+    try:
+        BP.set_motor_position(BP.PORT_C, BP.get_motor_encoder(BP.PORT_C) + d)
+    except IOError as error:
+        print(error)
     return
 	
 
@@ -166,7 +195,6 @@ def drop():
     open()
     up()
     return
-
 
 #########################  Main program loop  #################################
 	
