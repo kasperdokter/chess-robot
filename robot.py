@@ -17,169 +17,122 @@
 from __future__ import print_function # use python 3 syntax but make it compatible with python 2
 from __future__ import division       #                           ''
 
-import time         # import the time library for the sleep function
-import brickpi3     # import the BrickPi3 drivers
+import io
+import time
+import brickpi3
+#import picamera
+#import cv2
+import numpy as np
 
 BP = brickpi3.BrickPi3() # Create an instance of the BrickPi3 class. BP will be the BrickPi3 object.
 
-px = 50    # power limit for columns
-sx = 360   # speed limit for columns (degree/second)
-dx = -235  # degrees to move 1 column right
+X = BP.PORT_A
+Y = BP.PORT_C
+Z = BP.PORT_B
+H = BP.PORT_D
 
-py = 50    # power for rows
-sy = 360   # speed for rows (degree/second)
-dy = -2200 # degrees to move 1 row up
+px = 100   # power limit for columns
+sx = 500   # speed limit for columns (degree/second)
+dx = -733  # degrees to move 1 column right
 
-pz = 50    # power limit for lifting
-sz = 360   # speed limit for lifting (degree/second)
-dz = 10    # angle to lift the piece (degrees)
+py = 100   # power for rows
+sy = 500   # speed for rows (degree/second)
+dy = 733   # degrees to move 1 row up
+
+pz = 100   # power limit for lifting
+sz = 500   # speed limit for lifting (degree/second)
+dz = -900  # angle to lift the piece (degrees)
 tz = 2     # time to lift and lower the grabber (second)
 
-pu = 30    # power for closing the grabber
-tu = 0.9   # time to close the grabber
+pu = 100   # power for closing the grabber
+tu = 0.1   # time to close the grabber
 
-#########################  functions for easy finetuning  #################################
-
-def set_px(a):
-    global px
-    px = a
-    BP.set_motor_limits(BP.PORT_C, pz, sz)
-    return
-	
-def set_sx(a):
-    global sx
-    sx = a
-    BP.set_motor_limits(BP.PORT_C, pz, sz)
-    return
-	
-def set_dx(a):
-    global dx
-    dx = a
-    return
-	
-	
-def set_py(a):
-    global py
-    py = a
-    BP.set_motor_limits(BP.PORT_B, py, sy)
-    return
-	
-def set_sy(a):
-    global sy
-    sy = a
-    BP.set_motor_limits(BP.PORT_B, py, sy)
-    return
-	
-def set_dy(a):
-    global dy
-    dy = a
-    return
-	
-	
-def set_pz(a):
-    global pz
-    pz = a
-    BP.set_motor_limits(BP.PORT_A, pz, sz)
-    return
-	
-def set_sz(a):
-    global sz
-    sz = a
-    BP.set_motor_limits(BP.PORT_A, pz, sz)
-    return
-	
-def set_dz(a):
-    global dz
-    dz = a
-    return
-	
-def set_tz(a):
-    global tz
-    tz = a
-    return
-	
-	
-def set_pu(a):
-    global pu
-    pu = a
-    return
-	
-def set_tu(a):
-    global tu
-    tu = a
-    return
-
-########################################################################################
-
-
-def A(d):
+def x(d):
     try:
-        BP.set_motor_position(BP.PORT_A, BP.get_motor_encoder(BP.PORT_A) + d)
+        BP.set_motor_position(X, BP.get_motor_encoder(X) + d)
     except IOError as error:
         print(error)
     return
 
-def B(d):
+def y(d):
     try:
-        BP.set_motor_position(BP.PORT_B, BP.get_motor_encoder(BP.PORT_B) + d)
+        BP.set_motor_position(Y, BP.get_motor_encoder(Y) + d)
     except IOError as error:
         print(error)
     return
 
-def C(d):
+def z(d):
     try:
-        BP.set_motor_position(BP.PORT_C, BP.get_motor_encoder(BP.PORT_C) + d)
+        BP.set_motor_position(Z, BP.get_motor_encoder(Z) + d)
     except IOError as error:
         print(error)
     return
-	
+
+def h(t, p):
+    BP.set_motor_power(H, p)
+    time.sleep(t)
+    BP.set_motor_power(H, 0)
+    return
+
+#def pic():
+#    stream = io.BytesIO()
+#    with picamera.PiCamera() as camera:
+#        camera.start_preview()
+#        time.sleep(2)
+#        camera.capture(stream, format='jpeg')
+#    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+#    img = cv2.imdecode(data, 1)
+#    cv2.imshow('image', img)
+#    cv2.waitkey(0)
+#    cv2.destroyAllWindows()
+#    return
 
 #########################  Functions for robot movement  #################################
 
 
 def initialize():
     # resets the encoder of the motors and sets the motor limits.
-    BP.set_motor_limits(BP.PORT_A, pz, sz)
-    BP.set_motor_limits(BP.PORT_B, py, sy)
-    BP.set_motor_limits(BP.PORT_C, px, sx)
+    BP.set_motor_limits(Z, pz, sz)
+    BP.set_motor_limits(Y, py, sy)
+    BP.set_motor_limits(X, px, sx)
     try:
-        BP.offset_motor_encoder(BP.PORT_B, BP.get_motor_encoder(BP.PORT_A))
+        BP.offset_motor_encoder(BP.PORT_A, BP.get_motor_encoder(BP.PORT_A))
         BP.offset_motor_encoder(BP.PORT_B, BP.get_motor_encoder(BP.PORT_B))
         BP.offset_motor_encoder(BP.PORT_C, BP.get_motor_encoder(BP.PORT_C))
     except IOError as error:
         print(error)
     return
 	
-def moveto(x,y):
+def mv(x,y):
     # moves the robot to square (x,y) in {0,...,7}^2 = {a,...,h}x{1,...,8}
-    BP.set_motor_position(BP.PORT_C, x * dx)
-    BP.set_motor_position(BP.PORT_B, y * dy)
+    BP.set_motor_position(X, x * dx)
+    BP.set_motor_position(Y, y * dy)
     return
 
 def up():
     # lift the grabber
-    BP.set_motor_position(BP.PORT_A, 0)
+    BP.set_motor_position(Z, 0)
     time.sleep(tz)
     return
 	
 def down():
     # lower the grabber
-    BP.set_motor_position(BP.PORT_A, dz)
+    BP.set_motor_position(Z, dz)
     time.sleep(tz)
     return
 	
 def close():
     # close the grabber
-    BP.set_motor_power(BP.PORT_D, pu)
+    BP.set_motor_power(H, -pu)
     time.sleep(tu)
-    BP.set_motor_power(BP.PORT_D, 0)
+    BP.set_motor_power(H, 0)
     return
 
 def open():
     # open the grabber
-    BP.set_motor_power(BP.PORT_D, -pu)
+    BP.set_motor_power(H, pu)
     time.sleep(tu)
-    BP.set_motor_power(BP.PORT_D, 0)
+    BP.set_motor_power(H, 0)
     return
 	
 def grab():
@@ -203,6 +156,8 @@ try:
     if BP.get_voltage_battery() < 7:
         print("Battery voltage is too low (" + str(BP.get_voltage_battery())  + "V). Exiting.")
         SafeExit()
+
+    initialize()
 		
     while True:
         c = str(raw_input("> "))
