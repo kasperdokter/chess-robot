@@ -1,6 +1,20 @@
 import numpy as np
 import cv2
+#import picamera
 from matplotlib import pyplot as plt
+
+#def pic():
+#    stream = io.BytesIO()
+#    with picamera.PiCamera() as camera:
+#        camera.start_preview()
+#        time.sleep(2)
+#        camera.capture(stream, format='jpeg')
+#    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+#    img = cv2.imdecode(data, 1)
+#    cv2.imshow('image', img)
+#    cv2.waitkey(0)
+#    cv2.destroyAllWindows()
+#    return
 
 def show(img):
    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
@@ -22,6 +36,8 @@ def detectMove(img1, img2):
     Returns:
         string: textual representation of the move.
     """
+    show(img1)
+    show(img2)
     
     # Convert to gray scale
     img1_gray = cv2.cvtColor(img1,cv2.COLOR_BGR2GRAY)
@@ -55,7 +71,7 @@ def detectMove(img1, img2):
 
     # Get the size of the second image
     rows,cols = img2_gray.shape
-
+    
     # Align the second image.
     img3_gray = cv2.warpPerspective(img2_gray, M, (cols, rows))
     
@@ -67,45 +83,26 @@ def detectMove(img1, img2):
     diff = cv2.absdiff(blur_img1,blur_img3)
     
     # Transform the gray scale difference to black and white via threshholding
-    ret,thresh = cv2.threshold(diff,27,255,cv2.THRESH_BINARY_INV)
-
-    # Remove all small blobs via erosion followed by dilation (opening).
-    #kernel = np.ones((25,25),np.uint8)
-    #opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-    
-    # Set up the parameters of a SimpleBlobdetector.
-    params = cv2.SimpleBlobDetector_Params()
-    #params.minThreshold = 0;
-    #params.maxThreshold = 256;
-    params.filterByArea = False
-    #params.minArea = 0.8
-    params.filterByCircularity = False
-    #params.minCircularity = 0
-    params.filterByConvexity = False
-    params.filterByInertia = False
-    #params.minInertiaRatio = 0
-    
-    # Set up the SimpleBlobdetector.
-    detector = cv2.SimpleBlobDetector_create(params)
+    ret,thresh = cv2.threshold(diff,27,255,cv2.THRESH_BINARY)
     
     show(thresh)
- 
-    # Detect blobs.
-    keypoints = detector.detect(thresh)
     
-    print(keypoints)
+    squares = []
+    for x in range(8):
+       for y in range(8):
+          mask = np.zeros(thresh.shape, np.uint8)
+          mask = cv2.circle(mask, (900+1850*x/7-20*y/7,400+1840*y/7), 100, 255, -1)
+          m = cv2.mean(thresh, mask)
+          if (m[0] > 50):
+              squares.append((x,y))   
+              
+    print(squares)
     
-    # Draw detected blobs as red circles.
-    # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
-    im_with_keypoints = cv2.drawKeypoints(img2, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
- 
-    # Show keypoints
-    show(im_with_keypoints)
     return
 
 print("Reading images...")
-img1 = cv2.imread('pic/pic0.jpg')
-img2 = cv2.imread('pic/pic1.jpg')
+img1 = cv2.imread('pic.jpg')
+img2 = cv2.imread('pic2.jpg')
 
 print("Detecting move")
 detectMove(img1, img2)
