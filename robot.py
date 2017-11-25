@@ -12,9 +12,9 @@ class Robot:
     BP = brickpi3.BrickPi3() 
     
     # Ports of motors.
-    X = BP.PORT_A
-    Y = BP.PORT_C
-    Z = BP.PORT_B
+    X = BP.PORT_B
+    Y = BP.PORT_A
+    Z = BP.PORT_C
     H = BP.PORT_D
 
     px = 100   # power limit for columns
@@ -43,19 +43,19 @@ class Robot:
         """
             Initializes the robot.
         """
-        if BP.get_voltage_battery() < 7:
-            print("Battery voltage is too low (" + str(BP.get_voltage_battery())  + "V). Exiting.")
-            BP.reset_all()
+        if self.BP.get_voltage_battery() < 7:
+            print("Battery voltage is too low (" + str(self.BP.get_voltage_battery())  + "V). Exiting.")
+            self.BP.reset_all()
             sys.exit()
 
         # resets the encoder of the motors and sets the motor limits.
-        BP.set_motor_limits(X, px, sx)
-        BP.set_motor_limits(Y, py, sy)
-        BP.set_motor_limits(Z, pz, sz)
+        self.BP.set_motor_limits(self.X, self.px, self.sx)
+        self.BP.set_motor_limits(self.Y, self.py, self.sy)
+        self.BP.set_motor_limits(self.Z, self.pz, self.sz)
         try:
-            BP.offset_motor_encoder(X, BP.get_motor_encoder(X)-xc*dx)
-            BP.offset_motor_encoder(Y, BP.get_motor_encoder(Y)-yc*dy)
-            BP.offset_motor_encoder(Z, BP.get_motor_encoder(Z))
+            self.BP.offset_motor_encoder(self.X, self.BP.get_motor_encoder(self.X)-self.xc*self.dx)
+            self.BP.offset_motor_encoder(self.Y, self.BP.get_motor_encoder(self.Y)-self.yc*self.dy)
+            self.BP.offset_motor_encoder(self.Z, self.BP.get_motor_encoder(self.Z))
         except IOError as error:
             print(error)
         return
@@ -64,7 +64,7 @@ class Robot:
         """
             Terminates the robot.
         """
-        BP.reset_all()
+        self.BP.reset_all()
         return
     
     def move(self,x1,y1,x2,y2,up,cap):
@@ -77,28 +77,30 @@ class Robot:
         # In case of a capture, first take the captured piece and put it on the side of the board.
         if cap == True:
             self.moveto(x2,y2)
-            down()
-            close()
-            up()
-            self.moveto()
+            self.down()
+            self.close()
+            self.up()
+            self.moveto(8,y2)
+            self.open()
             
         self.moveto(x1,y1)
         self.down()
         self.close()
         if up == True:
             self.up()
-        moveto(x2,y2)
+        self.moveto(x2,y2)
         if up == True:
             self.down()
-        open()
-        up()
-        moveto(x0,y0)
+        self.open()
+        self.up()
+        self.moveto(x0,y0)
         return
     
     def moveto(self,x,y):
         """
-            Moves the robot to square (x,y) in {0,...,7}^2 = {a,...,h}x{1,...,8}
-        """      
+            Moves the robot
+        """ 
+   
         # calculate the duration of the move
         t = 1.2 * np.max([np.abs(x-self.xc),np.abs(y-self.yc)])
         
@@ -108,12 +110,12 @@ class Robot:
             vy = np.abs((y-self.yc)*self.dy/t)
             
             # set the speed of each motor
-            BP.set_motor_limits(self.X, self.px, vx)
-            BP.set_motor_limits(self.Y, self.py, vy)
+            self.BP.set_motor_limits(self.X, self.px, vx)
+            self.BP.set_motor_limits(self.Y, self.py, vy)
 
             # move with correct speed to target position
-            BP.set_motor_position(self.X, x * self.dx)
-            BP.set_motor_position(self.Y, y * self.dy)
+            self.BP.set_motor_position(self.X, x * self.dx)
+            self.BP.set_motor_position(self.Y, y * self.dy)
 
             # wait until the move is completed
             time.sleep(t)
@@ -126,7 +128,7 @@ class Robot:
         """
             Lift the grabber.
         """
-        BP.set_motor_position(self.Z, 0)
+        self.BP.set_motor_position(self.Z, 0)
         time.sleep(self.tz)
         return
         
@@ -134,7 +136,7 @@ class Robot:
         """
             Lower the grabber.
         """
-        BP.set_motor_position(self.Z, self.dz)
+        self.BP.set_motor_position(self.Z, self.dz)
         time.sleep(self.tz)
         return
         
@@ -142,18 +144,23 @@ class Robot:
         """
             Close the grabber.
         """
-        BP.set_motor_power(self.H, -self.pu)
+        self.BP.set_motor_power(self.H, -self.pu)
         time.sleep(self.tu)
-        BP.set_motor_power(self.H, 0)
+        self.BP.set_motor_power(self.H, 0)
         return
 
     def open(self):
         """
             Open the grabber.
         """
-        BP.set_motor_power(self.H, self.pu)
+        self.BP.set_motor_power(self.H, self.pu)
         time.sleep(self.tu)
-        BP.set_motor_power(self.H, 0)
+        self.BP.set_motor_power(self.H, 0)
         return
         
+    def h(self,p):
+        self.BP.set_motor_power(self.H, p)
+        time.sleep(0.1)
+        self.BP.set_motor_power(self.H, 0)
+        return
 

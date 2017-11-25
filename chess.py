@@ -3,9 +3,10 @@ import subprocess
 
 class Game:
     
-    # Start the stockfish engine
-    stockfish = subprocess.Popen(["./stockfish_8_x64.exe"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    
+    # Start the stockfish engine 
+    stockfish = subprocess.Popen(["/usr/games/stockfish"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    # ./stockfish_8_x64.exe    
+
     # Skill level (0,...,20)
     skill_level = 20
     

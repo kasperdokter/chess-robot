@@ -34,7 +34,7 @@ class Camera:
         
         # Convert to gray scale
         img1, img2 = L[2:]
-        img1_gray = cv2.cvtColor(,cv2.COLOR_BGR2GRAY)
+        img1_gray = cv2.cvtColor(img1,cv2.COLOR_BGR2GRAY)
         img2_gray = cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
         
         # Initiate STAR detector

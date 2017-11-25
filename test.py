@@ -7,12 +7,16 @@ C = camera.Camera()
 R = robot.Robot()   
 
 try:
-    
-    c = str(raw_input("> "))
-    try:
-        print(eval(c))
-    except Exception as err:
-        print(err)
-    
+
+    while True:
+        c = str(raw_input("> "))
+        if c == "q":
+            break
+        try:
+            print(eval(c))
+        except Exception as err:
+            print(err)
+    R.exit()    
+
 except KeyboardInterrupt:
-    R.stop()
+    R.exit()
