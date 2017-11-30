@@ -80,7 +80,7 @@ class Robot:
             self.down()
             self.close()
             self.up()
-            self.goto(8,y2)
+            self.goto(x2,-2)
             self.open()
             
         self.goto(x1,y1)

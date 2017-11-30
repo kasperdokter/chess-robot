@@ -8,7 +8,7 @@ R = robot.Robot()
 C = camera.Camera()          
 
 try:
-    print("Press enter to complete your move, or enter q to quit.")
+    print("Press enter to complete your move.")
     
     C.picture()
     
@@ -16,8 +16,6 @@ try:
     
         # Improve: detect when the user completed a move.
         c = raw_input(">")
-        if c == "q":
-            break
         
         # Take a picture
         C.picture()
@@ -35,7 +33,8 @@ try:
         m2 = G.best_move()
         
         # Perform the move at the chess board.
-        R.move(G.get_move(m))
+        #R.move(G.get_move(m))
+        print(G.get_move(m))
         
         # Update the internal board.
         G.move(m2)
@@ -45,3 +44,4 @@ try:
 
 except KeyboardInterrupt:
     R.stop()
+    C.save("p")
