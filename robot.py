@@ -19,22 +19,22 @@ class Robot:
 
     px = 100   # power limit for columns
     sx = 500   # speed limit for columns (degree/second)
-    dx = 710   # degrees to move 1 column right
+    dx = -710  # degrees to move 1 column right
 
     py = 100   # power for rows
     sy = 500   # speed for rows (degree/second)
-    dy = -710  # degrees to move 1 row up
+    dy = 710   # degrees to move 1 row up
 
     pz = 100   # power limit for lifting
     sz = 500   # speed limit for lifting (degree/second)
-    dz = -900  # angle to lift the piece (degrees)
+    dz = -750  # angle to lift the piece (degrees)
     tz = np.abs(dz/sz)
 
-    pu = 100   # power for closing the grabber
+    pu = 50    # power for closing the grabber
     tu = 0.17  # time to close the grabber
 
     # initial position
-    x0, y0 = (4, 7)
+    x0, y0 = (2, 7)
 
     # current position
     xc, yc = (x0, y0)
@@ -76,31 +76,31 @@ class Robot:
         
         # In case of a capture, first take the captured piece and put it on the side of the board.
         if cap == True:
-            self.moveto(x2,y2)
+            self.goto(x2,y2)
             self.down()
             self.close()
             self.up()
-            self.moveto(8,y2)
+            self.goto(8,y2)
             self.open()
             
-        self.moveto(x1,y1)
+        self.goto(x1,y1)
         self.down()
         self.close()
         if up == True:
             self.up()
-        self.moveto(x2,y2)
+        self.goto(x2,y2)
         if up == True:
             self.down()
         self.open()
         self.up()
-        self.moveto(x0,y0)
+        self.goto(x0,y0)
         return
     
-    def moveto(self,x,y):
+    def goto(self,x,y):
         """
             Moves the robot
-        """ 
-   
+        """
+
         # calculate the duration of the move
         t = 1.2 * np.max([np.abs(x-self.xc),np.abs(y-self.yc)])
         
@@ -158,9 +158,9 @@ class Robot:
         self.BP.set_motor_power(self.H, 0)
         return
         
-    def h(self,p):
+    def h(self,t,p):
         self.BP.set_motor_power(self.H, p)
-        time.sleep(0.1)
+        time.sleep(t)
         self.BP.set_motor_power(self.H, 0)
         return
 
