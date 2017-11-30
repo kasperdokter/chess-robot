@@ -25,13 +25,15 @@ class Robot:
     sy = 500   # speed for rows (degree/second)
     dy = 710   # degrees to move 1 row up
 
+    tsq = 1.1  # time to move over a single square (seconds)
+
     pz = 100   # power limit for lifting
-    sz = 500   # speed limit for lifting (degree/second)
+    sz = 800   # speed limit for lifting (degree/second)
     dz = -750  # angle to lift the piece (degrees)
     tz = np.abs(dz/sz)
 
     pu = 50    # power for closing the grabber
-    tu = 0.17  # time to close the grabber
+    tu = 0.2   # time to close the grabber
 
     # initial position
     x0, y0 = (2, 7)
@@ -47,6 +49,15 @@ class Robot:
             print("Battery voltage is too low (" + str(self.BP.get_voltage_battery())  + "V). Exiting.")
             self.BP.reset_all()
             sys.exit()
+
+        self.reset()
+        return
+
+    def reset(self):
+        """
+            Resets the robot to its initial configuration
+        """
+        self.BP.reset_all()
 
         # resets the encoder of the motors and sets the motor limits.
         self.BP.set_motor_limits(self.X, self.px, self.sx)
@@ -93,7 +104,9 @@ class Robot:
             self.down()
         self.open()
         self.up()
-        self.goto(x0,y0)
+        self.goto(self.x0,self.y0)
+        time.sleep(0.1)
+        self.reset()
         return
     
     def goto(self,x,y):
@@ -102,7 +115,7 @@ class Robot:
         """
 
         # calculate the duration of the move
-        t = 1.2 * np.max([np.abs(x-self.xc),np.abs(y-self.yc)])
+        t = self.tsq * np.max([np.abs(x-self.xc),np.abs(y-self.yc)])
         
         if t > 0:
             # calculate the speed of each coordinate

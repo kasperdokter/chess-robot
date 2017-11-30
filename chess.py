@@ -8,7 +8,7 @@ class Game:
     # ./stockfish_8_x64.exe    
 
     # Skill level (0,...,20)
-    skill_level = 20
+    skill_level = 3
     
     # Time that the computer can think.
     move_time = 1
@@ -59,12 +59,12 @@ class Game:
                     return True
             return False
             
-        if np.abs(x2-x1) == np.abs(y2-y1):
-            for t in range(1,np.abs(x2-x1)):
-                print (self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*t))
-                if self.position.has_key(self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*t)):
-                    return True
-            return False
+        #if np.abs(x2-x1) == np.abs(y2-y1):
+        #    for t in range(1,np.abs(x2-x1)):
+        #        print (self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*t))
+        #        if self.position.has_key(self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*t)):
+        #            return True
+        #    return False
 
         return True
         
@@ -106,7 +106,7 @@ class Game:
             print(line)
         return
         
-    def bestmove(self):
+    def best_move(self):
         """
             Invokes Stockfish to calculate the best move in the current position.
             

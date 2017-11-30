@@ -10,38 +10,44 @@ C = camera.Camera()
 try:
     print("Press enter to complete your move.")
     
+    G.new_game()
     C.picture()
     
     while True:
     
         # Improve: detect when the user completed a move.
-        c = raw_input(">")
+        m1 = raw_input(">")
         
-        # Take a picture
-        C.picture()
+        if m1 == "":
+            # Take a picture
+            C.picture()
         
-        # Get all squares that changed since the previous move.
-        squares = C.changes()
+            # Get all squares that changed since the previous move.
+            #squares = C.changes()
         
-        # Use the current position to determine what move is played.
-        m1 = G.find_move(squares)
+            # Use the current position to determine what move is played.
+            #print(G.find_move(squares))
         
         # Execute the move on the internal board.
         G.move(m1)
-        
+
         # Let the engine calculate the best move.
         m2 = G.best_move()
-        
+               
         # Perform the move at the chess board.
-        #R.move(G.get_move(m))
-        print(G.get_move(m))
-        
+        x1,y1,x2,y2,lift,cap = G.get_move(m2)
+        print("reply " + m2 + " : " + str(G.get_move(m2)))
+        R.move(x1,y1,x2,y2,lift,cap)
+        #raw_input("please execute " + m2 + " : " + str(G.get_move(m2)))        
+
         # Update the internal board.
         G.move(m2)
-        
+
+        G.show()
+
         # Take a picture.
         C.picture()
 
 except KeyboardInterrupt:
-    R.stop()
+    R.exit()
     C.save("p")

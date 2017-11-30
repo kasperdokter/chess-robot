@@ -3,42 +3,48 @@ from __future__ import division
 
 import io
 import cv2
+import time
 import picamera
+import picamera.array
 import numpy as np
 
 class Camera:
     
     # List of pictures
     L = []
+
+    # Time to wait before taking picture
+    t = 0.5
     
-    def save(name):
+    def save(self,name):
         """
             Saves all pictures to disk.
         """
-        for k, img in enumerate(L):
+        for k, img in enumerate(self.L):
             cv2.imwrite(name + str(k) + ".jpg", img)
         return
         
-    def picture():
+    def picture(self):
         """
             Takes a picture, appends it to the list.
         """
-        stream = io.BytesIO()
+        print("Taking picture...")
         with picamera.PiCamera() as camera:
-            time.sleep(2)
-            camera.capture(stream, format='jpeg')
-        data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-        img = cv2.imdecode(data, 1)
-        L.append(img)
+            rawCapture = picamera.array.PiRGBArray(camera)
+            time.sleep(self.t)
+            camera.capture(rawCapture, format='bgr')
+            img = rawCapture.array
+            self.L.append(img)
         return
        
-    def changes():
+    def changes(self):
         """
             Computes a list of squares that changes between the last two images in the list.
         """
-        
+       
+        print(cv2.__version__) 
         # Convert to gray scale
-        img1, img2 = L[2:]
+        img1, img2 = self.L[:2]
         img1_gray = cv2.cvtColor(img1,cv2.COLOR_BGR2GRAY)
         img2_gray = cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
         
