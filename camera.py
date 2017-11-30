@@ -7,16 +7,21 @@ import picamera
 import numpy as np
 
 class Camera:
-
-    # Empty chessboard
-    img0 = cv2.imread('pic/empty.jpg')
     
     # List of pictures
-    L = [img0]
+    L = []
+    
+    def save(name):
+        """
+            Saves all pictures to disk.
+        """
+        for k, img in enumerate(L):
+            cv2.imwrite(name + str(k) + ".jpg", img)
+        return
         
     def picture():
         """
-            Takes a picture and appends it to the list.
+            Takes a picture, appends it to the list.
         """
         stream = io.BytesIO()
         with picamera.PiCamera() as camera:
@@ -70,22 +75,24 @@ class Camera:
         img3_gray = cv2.warpPerspective(img2_gray, M, (cols, rows))
         
         # Blur the second image and the aligned version of the second image
-        blur_img1 = cv2.blur(img1_gray,(45,45))
-        blur_img3 = cv2.blur(img3_gray,(45,45))
+        k = 35
+        blur_img1 = cv2.blur(img1_gray,(k,k))
+        blur_img3 = cv2.blur(img3_gray,(k,k))
         
         # Take the absolute difference of the these images
         diff = cv2.absdiff(blur_img1,blur_img3)
         
         # Transform the gray scale difference to black and white via threshholding
-        ret,thresh = cv2.threshold(diff,27,255,cv2.THRESH_BINARY)
+        ret,thresh = cv2.threshold(diff,50,255,cv2.THRESH_BINARY)
         
+        # Iterate over the usual locations of the squares to find what changed
         squares = []
         for x in range(8):
            for y in range(8):
               mask = np.zeros(thresh.shape, np.uint8)
-              mask = cv2.circle(mask, (900+1850*x/7-20*y/7,400+1840*y/7), 100, 255, -1) #TODO
+              mask = cv2.circle(mask, (485+2040*x/7+10*y/7,300+2040*y/7), 150, 255, -1)
               m = cv2.mean(thresh, mask)
-              if (m[0] > 50):
-                  squares.append((x,y))   
+              if (m[0] > 5):
+                  squares.append((8-x,y))   
         
         return squares
