@@ -30,8 +30,9 @@ class Robot:
     pz = 100   # power limit for lifting
     sz = 800   # speed limit for lifting (degree/second)
     dz = -800  # angle to lift the piece (degrees)
-    tz = np.abs(dz/sz)
-
+    hRNB = 50  # extra height of the grabber for rook, knight, and bishop
+    hKQ = 100  # extra height of the grabber for king, and queen
+    
     pu = 60    # power for closing the grabber
     tu = 0.2   # time to close the grabber
 
@@ -78,31 +79,40 @@ class Robot:
         self.BP.reset_all()
         return
     
-    def move(self,x1,y1,x2,y2,up,cap,castle):
+    def move(self,p1,x1,y1,p2,x2,y2,lift,castle):
         """
             Performs a move on the chess board.
+            p1 is the piece at source location
+            x1,y1 is source location
+            p2 is the piece at target location (empty string "" if no piece is there)
+            x2,y2 is target location
+            lift is true, if the piece must be lifted
+            castle is true, if the rook must be moved
         """
         
         # In case of a capture, first take the captured piece and put it on the side of the board.
-        if cap == True:
-            self.goto(x2,y2)
-            self.down()
-            self.close()
-            self.up()
-            self.goto(x2,-2)
-            self.open()
+        if p2 != "":
         
-        # Move the piece from (x1,x2) to (y1,y2)    
-        self.goto(x1,y1)
-        self.down()
-        self.close()
-        if up == True:
-            self.up()
-        self.goto(x2,y2)
-        if up == True:
-            self.down()
-        self.open()
-        self.up()
+            x3 = x2
+            y3 = y2
+            
+            # If we are closer to the side, move horizontally.
+            if np.abs(y2-3.5) <= np.abs(x2-3.5):
+                if (x2 <= 3)
+                    x3 = -1
+                else 
+                    x3 = 8
+            else:
+                if (y2 <= 3)
+                    y3 = -1
+                else 
+                    y3 = 8
+                    
+            # Move the captured piece to the side.
+            self.transport(p2,x1,y1,x3,y3,True)
+        
+        # Move the piece from (x1,x2) to (y1,y2)
+        self.transport(p1,x1,y1,x2,y2,lift)
 
         # If move is a castling move, move the rook.
         if castle == True:
@@ -111,21 +121,30 @@ class Robot:
             if x2 == 6:
                 xr1 = 7
                 xr2 = 5
-            self.goto(xr1,y2)
-            self.down()
-            self.close()
-            self.up()
-            self.goto(xr2,y2)
-            self.down()
-            self.open()
-            self.up()
+            self.transport("r",xr1,y2,xr2,y2,True)
 
         # Go to initial position and reset the motors.
         self.goto(self.x0,self.y0)
         time.sleep(0.2)
         self.reset()
         return
-
+        
+    def transport(self,p,x1,y1,x2,y2,up)
+        """
+            Transports a piece p from (x1,y1) to (x2,y2) 
+        """
+        self.goto(x1,y1)
+        self.down(p)
+        self.close()
+        if up == True:
+            self.up()
+        self.goto(x2,y2)
+        if up == True:
+            self.down()
+        self.open()
+        self.up()
+        return
+        
     def goto(self,x,y):
         """
             Moves the robot
@@ -154,20 +173,30 @@ class Robot:
             self.xc, self.yc = (x, y)
         return
 
-    def up(self):
+    def up(self,p):
         """
             Lift the grabber.
         """
+        h = 0
+        if p.lower() in ["r", "n", "b"]:
+            h = self.hRNB
+        if p.lower() in ["k", "q"]:
+            h = self.hKQ
         self.BP.set_motor_position(self.Z, 0)
-        time.sleep(self.tz)
+        time.sleep(np.abs((dz+h)/sz))
         return
         
-    def down(self):
+    def down(self,p):
         """
             Lower the grabber.
         """
-        self.BP.set_motor_position(self.Z, self.dz)
-        time.sleep(self.tz)
+        h = 0
+        if p.lower() in ["r", "n", "b"]:
+            h = self.hRNB
+        if p.lower() in ["k", "q"]:
+            h = self.hKQ
+        self.BP.set_motor_position(self.Z, self.dz + h)
+        time.sleep(np.abs((dz+h)/sz))
         return
         
     def close(self):

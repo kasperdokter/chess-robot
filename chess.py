@@ -35,9 +35,21 @@ class Game:
         """
             Transform the move into a format understandable for the robot.
         """
-        x1,y1 = self.a2c(m[:2])
-        x2,y2 = self.a2c(m[2:])
-        return x1,y1,x2,y2,self.need_lift(m),self.is_capture(m),self.is_castle(m)
+        s1 = m[:2]
+        s2 = m[2:]
+        
+        p1 = self.position[s1]
+        x1,y1 = self.a2c(s1)
+        
+        p2 = ""
+        if self.position.has_key(s2):
+            p2 = self.position[s2]
+        x2,y2 = self.a2c(s2)
+        
+        lift = self.need_lift(m)
+        castle = self.is_castle(m)
+        
+        return p1,x1,y1,p2,x2,y2,lift,castle
 
     def is_castle(self,m):
         """
@@ -98,14 +110,6 @@ class Game:
 
         # By default, the piece must be lifted.
         return True
-        
-    def is_capture(self,m):
-        """
-            Checks if this move captures a piece.
-            
-            :param string m: Simplified algebraic notation of the move (such as g1f3 for Ng1-f3 and e1g1 for 0-0).
-        """
-        return self.position.has_key(m[2:])
         
     def move(self,m):
         """

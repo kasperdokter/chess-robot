@@ -35,9 +35,9 @@ try:
         m2 = G.best_move()
                
         # Perform the move at the chess board.
-        x1,y1,x2,y2,lift,cap,castle = G.get_move(m2)
+        p1,x1,y1,p2,x2,y2,lift,castle = G.get_move(m2)
         print("< " + m2)
-        R.move(x1,y1,x2,y2,lift,cap,castle)
+        R.move(p1,x1,y1,p2,x2,y2,lift,castle)
         #raw_input("please execute " + m2 + " : " + str(G.get_move(m2)))        
 
         # Update the internal board.
