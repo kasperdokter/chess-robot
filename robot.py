@@ -29,7 +29,7 @@ class Robot:
 
     pz = 100   # power limit for lifting
     sz = 800   # speed limit for lifting (degree/second)
-    dz = -800  # angle to lift the piece (degrees)
+    dz = -900  # angle to lift the piece (degrees)
     hRNB = 50  # extra height of the grabber for rook, knight, and bishop
     hKQ = 100  # extra height of the grabber for king, and queen
     
@@ -98,18 +98,18 @@ class Robot:
             
             # If we are closer to the side, move horizontally.
             if np.abs(y2-3.5) <= np.abs(x2-3.5):
-                if (x2 <= 3)
+                if (x2 <= 3):
                     x3 = -1
-                else 
+                else: 
                     x3 = 8
             else:
-                if (y2 <= 3)
+                if (y2 <= 3):
                     y3 = -1
-                else 
+                else:
                     y3 = 8
                     
             # Move the captured piece to the side.
-            self.transport(p2,x1,y1,x3,y3,True)
+            self.transport(p2,x2,y2,x3,y3,True)
         
         # Move the piece from (x1,x2) to (y1,y2)
         self.transport(p1,x1,y1,x2,y2,lift)
@@ -129,7 +129,7 @@ class Robot:
         self.reset()
         return
         
-    def transport(self,p,x1,y1,x2,y2,up)
+    def transport(self,p,x1,y1,x2,y2,up):
         """
             Transports a piece p from (x1,y1) to (x2,y2) 
         """
@@ -137,12 +137,12 @@ class Robot:
         self.down(p)
         self.close()
         if up == True:
-            self.up()
+            self.up(p)
         self.goto(x2,y2)
         if up == True:
-            self.down()
+            self.down(p)
         self.open()
-        self.up()
+        self.up(p)
         return
         
     def goto(self,x,y):
@@ -183,7 +183,7 @@ class Robot:
         if p.lower() in ["k", "q"]:
             h = self.hKQ
         self.BP.set_motor_position(self.Z, 0)
-        time.sleep(np.abs((dz+h)/sz))
+        time.sleep(np.abs((self.dz+h)/self.sz))
         return
         
     def down(self,p):
@@ -196,7 +196,7 @@ class Robot:
         if p.lower() in ["k", "q"]:
             h = self.hKQ
         self.BP.set_motor_position(self.Z, self.dz + h)
-        time.sleep(np.abs((dz+h)/sz))
+        time.sleep(np.abs((self.dz+h)/self.sz))
         return
         
     def close(self):

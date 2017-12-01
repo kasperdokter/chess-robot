@@ -36,7 +36,7 @@ class Game:
             Transform the move into a format understandable for the robot.
         """
         s1 = m[:2]
-        s2 = m[2:]
+        s2 = m[2:4]
         
         p1 = self.position[s1]
         x1,y1 = self.a2c(s1)
@@ -55,12 +55,14 @@ class Game:
         """
             Checks if the move is a castling move.
         """
-        if m[:2] == "e1" and self.position.has_key("e1"):
-            if position["e1"] == "k" and (m[2:] == "c1" or m[2:] == "g1"):
+        s1 = m[:2]
+        s2 = m[2:4]
+        if s1 == "e1" and self.position.has_key("e1"):
+            if self.position["e1"] == "k" and (s2 == "c1" or s2 == "g1"):
                 return True  
         
-        if m[:2] == "e8" and self.position.has_key("e8"):
-            if position["e8"] == "K" and (m[2:] == "c8" or m[2:] == "g8"):
+        if s1 == "e8" and self.position.has_key("e8"):
+            if self.position["e8"] == "K" and (s2 == "c8" or s2 == "g8"):
                 return True
 
         return False
@@ -77,7 +79,7 @@ class Game:
             return False
 
         x1,y1 = self.a2c(m[:2])
-        x2,y2 = self.a2c(m[2:])
+        x2,y2 = self.a2c(m[2:4])
 
         # If the move is vertical, check for obstacles.
         if x1 == x2:
@@ -115,12 +117,15 @@ class Game:
         """
             Executes a move.
             
-            :param string m: Simplified algebraic notation of the move (such as g1f3 for Ng1-f3 and e1g1 for 0-0).
+            :param string m: Simplified algebraic notation of the move (such as g1f3, e1g1 (0-0), d7d8q (promotion)).
         """
         s0 = m[:2]
-        s1 = m[2:]
+        s1 = m[2:4]
         if self.position.has_key(s0):
-            self.position[s1] = self.position[s0]
+            p = self.position[s0]
+            if len(m) == 5:
+                p = m[4]
+            self.position[s1] = p
             del self.position[s0]
         self.moves.append(m)
         return
