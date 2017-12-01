@@ -8,10 +8,10 @@ class Game:
     # ./stockfish_8_x64.exe    
 
     # Skill level (0,...,20)
-    skill_level = 3
+    skill_level = 6
     
     # Time that the computer can think.
-    move_time = 1
+    move_time = 2
 
     # Moves of the game
     moves = []
@@ -37,7 +37,21 @@ class Game:
         """
         x1,y1 = self.a2c(m[:2])
         x2,y2 = self.a2c(m[2:])
-        return x1,y1,x2,y2,self.need_lift(m),self.is_capture(m)
+        return x1,y1,x2,y2,self.need_lift(m),self.is_capture(m),self.is_castle(m)
+
+    def is_castle(self,m):
+        """
+            Checks if the move is a castling move.
+        """
+        if m[:2] == "e1" and self.position.has_key("e1"):
+            if position["e1"] == "k" and (m[2:] == "c1" or m[2:] == "g1"):
+                return True  
+        
+        if m[:2] == "e8" and self.position.has_key("e8"):
+            if position["e8"] == "K" and (m[2:] == "c8" or m[2:] == "g8"):
+                return True
+
+        return False
         
     def need_lift(self,m):
         """
@@ -45,27 +59,44 @@ class Game:
             
             :param string m: Simplified algebraic notation of the move (such as g1f3 for Ng1-f3 and e1g1 for 0-0).
         """
+
+        # Never lift a pawn
+        if self.position[m[:2]] == "p" or self.position[m[:2]] == "P":
+            return False
+
         x1,y1 = self.a2c(m[:2])
         x2,y2 = self.a2c(m[2:])
+
+        # If the move is vertical, check for obstacles.
         if x1 == x2:
             for t in range(1,y2-y1):
                 if self.position.has_key(self.c2a(x1,y1+t)):
                     return True
             return False
-                    
+
+        # If the move is horizontal, check for obstacles.
         if y1 == y2:
             for t in range(1,x2-x1):
                 if self.position.has_key(self.c2a(x1+t,y1)):
                     return True
             return False
-            
-        #if np.abs(x2-x1) == np.abs(y2-y1):
-        #    for t in range(1,np.abs(x2-x1)):
-        #        print (self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*t))
-        #        if self.position.has_key(self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*t)):
-        #            return True
-        #    return False
 
+        # If the move is diagonal, check for obstacles below, above, and on the diagonal.
+        if np.abs(x2-x1) == np.abs(y2-y1):
+            if self.position.has_key(self.c2a(x1+np.sign(x2-x1),y1)):
+                return True
+            if self.position.has_key(self.c2a(x1,y1+np.sign(y2-y1))):
+                return True
+            for t in range(1,np.abs(x2-x1)):
+                if self.position.has_key(self.c2a(x1+np.sign(x2-x1)*(t+1),y1+np.sign(y2-y1)*t)):
+                    return True
+                if self.position.has_key(self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*(t+1))):
+                    return True
+                if self.position.has_key(self.c2a(x1+np.sign(x2-x1)*t,y1+np.sign(y2-y1)*t)):
+                    return True
+            return False
+
+        # By default, the piece must be lifted.
         return True
         
     def is_capture(self,m):

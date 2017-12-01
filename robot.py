@@ -29,10 +29,10 @@ class Robot:
 
     pz = 100   # power limit for lifting
     sz = 800   # speed limit for lifting (degree/second)
-    dz = -750  # angle to lift the piece (degrees)
+    dz = -800  # angle to lift the piece (degrees)
     tz = np.abs(dz/sz)
 
-    pu = 50    # power for closing the grabber
+    pu = 60    # power for closing the grabber
     tu = 0.2   # time to close the grabber
 
     # initial position
@@ -78,12 +78,10 @@ class Robot:
         self.BP.reset_all()
         return
     
-    def move(self,x1,y1,x2,y2,up,cap):
+    def move(self,x1,y1,x2,y2,up,cap,castle):
         """
             Performs a move on the chess board.
         """
-        
-        # todo rochade
         
         # In case of a capture, first take the captured piece and put it on the side of the board.
         if cap == True:
@@ -93,7 +91,8 @@ class Robot:
             self.up()
             self.goto(x2,-2)
             self.open()
-            
+        
+        # Move the piece from (x1,x2) to (y1,y2)    
         self.goto(x1,y1)
         self.down()
         self.close()
@@ -104,11 +103,29 @@ class Robot:
             self.down()
         self.open()
         self.up()
+
+        # If move is a castling move, move the rook.
+        if castle == True:
+            xr1 = 0
+            xr2 = 3
+            if x2 == 6:
+                xr1 = 7
+                xr2 = 5
+            self.goto(xr1,y2)
+            self.down()
+            self.close()
+            self.up()
+            self.goto(xr2,y2)
+            self.down()
+            self.open()
+            self.up()
+
+        # Go to initial position and reset the motors.
         self.goto(self.x0,self.y0)
-        time.sleep(0.1)
+        time.sleep(0.2)
         self.reset()
         return
-    
+
     def goto(self,x,y):
         """
             Moves the robot

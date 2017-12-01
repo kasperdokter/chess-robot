@@ -8,15 +8,15 @@ R = robot.Robot()
 C = camera.Camera()          
 
 try:
-    print("Press enter to complete your move.")
-    
+    print("De Schaakturk")
+    G.skill_level = int(raw_input("Welk niveau wil je spelen [0..20]? "))
     G.new_game()
     C.picture()
     
     while True:
     
         # Improve: detect when the user completed a move.
-        m1 = raw_input(">")
+        m1 = raw_input("> ")
         
         if m1 == "":
             # Take a picture
@@ -35,9 +35,9 @@ try:
         m2 = G.best_move()
                
         # Perform the move at the chess board.
-        x1,y1,x2,y2,lift,cap = G.get_move(m2)
-        print("reply " + m2 + " : " + str(G.get_move(m2)))
-        R.move(x1,y1,x2,y2,lift,cap)
+        x1,y1,x2,y2,lift,cap,castle = G.get_move(m2)
+        print("< " + m2)
+        R.move(x1,y1,x2,y2,lift,cap,castle)
         #raw_input("please execute " + m2 + " : " + str(G.get_move(m2)))        
 
         # Update the internal board.
