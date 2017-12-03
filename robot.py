@@ -80,7 +80,7 @@ class Robot:
         self.BP.reset_all()
         return
     
-    def move(self,p1,x1,y1,p2,x2,y2,lift,castle):
+    def move(self,p1,x1,y1,p2,x2,y2,lift,castle,ep):
         """
             Performs a move on the chess board.
             p1 is the piece at source location
@@ -89,29 +89,13 @@ class Robot:
             x2,y2 is target location
             lift is true, if the piece must be lifted
             castle is true, if the rook must be moved
+            ep is true, for en passant capture
         """
         
         # In case of a capture, first take the captured piece and put it on the side of the board.
         if p2 != "":
-        
-            x3 = x2
-            y3 = y2
+            self.remove(p2,x2,y2)
             
-            # If we are closer to the side, move horizontally.
-            if np.abs(y2-3.5) <= np.abs(x2-3.5):
-                if (x2 <= 3):
-                    x3 = -1
-                else: 
-                    x3 = 8
-            else:
-                if (y2 <= 3):
-                    y3 = -1
-                else:
-                    y3 = 8
-                    
-            # Move the captured piece to the side.
-            self.transport(p2,x2,y2,x3,y3,True)
-        
         # Move the piece from (x1,x2) to (y1,y2)
         self.transport(p1,x1,y1,x2,y2,lift)
 
@@ -123,6 +107,10 @@ class Robot:
                 xr1 = 7
                 xr2 = 5
             self.transport("r",xr1,y2,xr2,y2,True)
+        
+        # If move is en passant, capture the pawn.
+        if ep == True:
+            self.remove("p",x2,y1)
 
         # Go to initial position and reset the motors.
         self.goto(self.x0,self.y0)
@@ -144,6 +132,30 @@ class Robot:
             self.down(p)
         self.open()
         self.up(p)
+        return
+        
+    def remove(p,x,y):
+        """
+            Removes a piece p from (x,y) to an edge of the board. 
+        """
+        xe = x
+        ye = y
+        
+        # If we are closer to the side, move horizontally.
+        if np.abs(y-3.5) <= np.abs(x-3.5):
+            if (x <= 3):
+                xe = -1
+            else: 
+                xe = 8
+        else:
+            if (y <= 3):
+                ye = -1
+            else:
+                ye = 8
+                
+        # Move the captured piece to the side.
+        self.transport(p,x,y,xe,ye,True)
+        
         return
         
     def goto(self,x,y):

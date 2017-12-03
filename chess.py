@@ -48,8 +48,9 @@ class Game:
         
         lift = self.need_lift(m)
         castle = self.is_castle(m)
+        ep = self.is_enpassant(m)
         
-        return p1,x1,y1,p2,x2,y2,lift,castle
+        return p1,x1,y1,p2,x2,y2,lift,castle,ep
 
     def is_castle(self,m):
         """
@@ -75,8 +76,8 @@ class Game:
         s2 = m[2:4]
         if self.position.has_key(s1) and not self.position.has_key(s2):
             if self.position[s1].lower() == "p" and m[0] != m[2]:
-                del self.position[m[2]+m[1]]
-        return
+                return True
+        return False
         
     def need_lift(self,m):
         """
@@ -133,11 +134,31 @@ class Game:
         s0 = m[:2]
         s1 = m[2:4]
         if self.position.has_key(s0):
+            
+            # Get the piece
             p = self.position[s0]
+            
+            # Update, if case of promotion
             if len(m) == 5:
                 p = m[4]
+            
+            # Drop the piece
             self.position[s1] = p
             del self.position[s0]
+            
+            # For castling, move the rook
+            if self.is_castle():
+                if s1[0] == "c":
+                    self.position["d" + m[1])
+                    del self.position["a" + m[1]]
+                else:
+                    self.position["f" + m[1])
+                    del self.position["h" + m[1]]
+            
+            # En passant capture
+            if self.is_enpassant():
+                del self.position[m[2]+m[1]]
+            
         self.moves.append(m)
         return
         

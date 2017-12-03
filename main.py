@@ -11,9 +11,11 @@ try:
     print("De Schaakturk")
     G.skill_level = int(raw_input("Welk niveau wil je spelen [0..20]? "))
     G.new_game()
-    C.picture()
     
     while True:
+    
+        # Take a picture.
+        C.picture()
     
         # Improve: detect when the user completed a move.
         m1 = raw_input("> ")
@@ -35,18 +37,15 @@ try:
         m2 = G.best_move()
                
         # Perform the move at the chess board.
-        p1,x1,y1,p2,x2,y2,lift,castle = G.get_move(m2)
+        p1,x1,y1,p2,x2,y2,lift,castle,ep = G.get_move(m2)
         print("< " + m2)
-        R.move(p1,x1,y1,p2,x2,y2,lift,castle)
+        R.move(p1,x1,y1,p2,x2,y2,lift,castle,ep)
         #raw_input("please execute " + m2 + " : " + str(G.get_move(m2)))        
 
         # Update the internal board.
         G.move(m2)
 
         G.show()
-
-        # Take a picture.
-        C.picture()
 
 except KeyboardInterrupt:
     R.exit()
