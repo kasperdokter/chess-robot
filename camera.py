@@ -21,7 +21,7 @@ class Camera:
             Saves all pictures to disk.
         """
         for k, img in enumerate(self.L):
-            cv2.imwrite(name + str(k) + ".jpg", img)
+            cv2.imwrite(name + format(k, '03') + ".jpg", img)
         return
         
     def picture(self):
