@@ -35,6 +35,7 @@ class Robot:
     
     pu = 60    # power for closing the grabber
     tu = 0.2   # time to close the grabber
+    du = 0.01  # less time to open grabber
 
     # initial position
     x0, y0 = (2, 7)
@@ -213,7 +214,7 @@ class Robot:
             Open the grabber.
         """
         self.BP.set_motor_power(self.H, self.pu)
-        time.sleep(self.tu)
+        time.sleep(self.tu-self.du)
         self.BP.set_motor_power(self.H, 0)
         return
         

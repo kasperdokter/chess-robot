@@ -66,6 +66,17 @@ class Game:
                 return True
 
         return False
+
+    def is_enpassant(self,m):
+         """
+             Checks if the move is an en passant capture
+         """
+        s1 = m[:2]
+        s2 = m[2:4]
+        if self.position.has_key(s1) and not self.position.has_key(s2):
+            if self.position[s1].lower() == "p" and m[0] != m[2]:
+                del self.position[m[2]+m[1]]
+        return
         
     def need_lift(self,m):
         """
