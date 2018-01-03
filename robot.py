@@ -38,7 +38,7 @@ class Robot:
     du = 0.01  # less time to open grabber
 
     # initial position
-    x0, y0 = (2, 7)
+    x0, y0 = (2, 8)
 
     # current position
     xc, yc = (x0, y0)
@@ -134,7 +134,7 @@ class Robot:
         self.up(p)
         return
         
-    def remove(p,x,y):
+    def remove(self,p,x,y):
         """
             Removes a piece p from (x,y) to an edge of the board. 
         """

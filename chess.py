@@ -69,9 +69,9 @@ class Game:
         return False
 
     def is_enpassant(self,m):
-         """
-             Checks if the move is an en passant capture
-         """
+        """
+            Checks if the move is an en passant capture
+        """
         s1 = m[:2]
         s2 = m[2:4]
         if self.position.has_key(s1) and not self.position.has_key(s2):
@@ -147,16 +147,16 @@ class Game:
             del self.position[s0]
             
             # For castling, move the rook
-            if self.is_castle():
+            if self.is_castle(m):
                 if s1[0] == "c":
-                    self.position["d" + m[1])
+                    self.position["d" + m[1]]
                     del self.position["a" + m[1]]
                 else:
-                    self.position["f" + m[1])
+                    self.position["f" + m[1]]
                     del self.position["h" + m[1]]
             
             # En passant capture
-            if self.is_enpassant():
+            if self.is_enpassant(m):
                 del self.position[m[2]+m[1]]
             
         self.moves.append(m)
