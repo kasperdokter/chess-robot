@@ -90,15 +90,31 @@ class Camera:
         
         # Transform the gray scale difference to black and white via threshholding
         ret,thresh = cv2.threshold(diff,50,255,cv2.THRESH_BINARY)
+
+        pts1 = np.float32([[0,0],[800,0],[0,800],[800,800]])
+        pts2 = np.float32([[65,500],[680,500],[165,48],[580,40]])
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        blank = np.zeros((800,800), np.uint8)
+        
+        #copy = img3_gray
+        #for x in range(8):
+        #    for y in range(8):
+        #        mask = cv2.rectangle(blank, (x,y), (100*(x+1),100*(y+1)), 255, 10) 
+        #        mask = cv2.warpPerspective(mask,M,(cols,rows))
+        #        mask = cv2.bitwise_not(mask)
+        #        copy = cv2.bitwise_and(mask, copy)        
+        #show(copy)
         
         # Iterate over the usual locations of the squares to find what changed
         squares = []
         for x in range(8):
-           for y in range(8):
-              mask = np.zeros(thresh.shape, np.uint8)
-              mask = cv2.circle(mask, (485+2040*x/7+10*y/7,300+2040*y/7), 150, 255, -1)
-              m = cv2.mean(thresh, mask)
-              if (m[0] > 5):
-                  squares.append((8-x,y))   
+            for y in range(8):
+                del mask
+                mask = np.zeros((800,800), np.uint8)
+                mask = cv2.rectangle(mask, (100*x,100*y), (100*(x+1),100*(y+1)), 255, -1) 
+                mask = cv2.warpPerspective(mask,M,(cols,rows))
+                m = cv2.mean(thresh, mask)
+                if (m[0] > 5):
+                    squares.append((7-x,y))    
         
         return squares
