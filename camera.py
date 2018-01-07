@@ -15,10 +15,6 @@ class Camera:
 
     # Time to wait before taking picture
     t = 0.5
-    
-    def view(self):
-        self.show(self.L[0])
-        return
 
     def save(self,name):
         """
@@ -37,18 +33,51 @@ class Camera:
             time.sleep(self.t)
             camera.capture(rawCapture, format='bgr')
             img = rawCapture.array
-            self.L.append(img)
+            self.show(img)
+            warp = self.warp(img)
+            gray = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY)
+            blur = cv2.blur(gray,(5,5))
+            self.show(blur)
+            self.L.append(blur)
         return
        
     def show(self,img):
         cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('image', 720,400)
+        cv2.resizeWindow('image', 400,400)
         cv2.imshow('image', img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         return
 
     def changes(self):
+        """
+            Computes a list of squares that changes between the last two images in the list.
+        """
+        
+        # Take the absolute difference of the these images
+        diff = cv2.absdiff(self.L[-1],self.L[-2])
+        
+        # Transform the gray scale difference to black and white via thresholding
+        ret,thresh = cv2.threshold(diff,25,255,cv2.THRESH_BINARY)
+        
+        self.show(thresh)
+
+        # Iterate over the usual locations of the squares to find what changed
+        squares = []
+        for x in range(8):
+            for y in range(8):
+                mask = np.zeros((400,400), np.uint8)
+                cv2.rectangle(mask, (50*x,50*y), (50*(x+1),50*(y+1)), 255, -1)
+                m = cv2.mean(square, mask)
+                if (m[0] > 5):
+                    squares.append((x,y))    
+        
+        if len(squares) > 2:
+            self.show(square)
+        
+        return squares
+        
+    def changes1(self):
         """
             Computes a list of squares that changes between the last two images in the list.
         """
@@ -125,3 +154,83 @@ class Camera:
             self.show(square)
         
         return squares
+        
+    def getBlobs(self,img):
+        # Convert BGR to HSV
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        
+        # Define range of marker color in HSV
+        h = 79
+        lower = np.array([h-10,50,50])
+        upper = np.array([h+10,255,255])
+        
+        # Threshold the HSV image to get only marker colors
+        blobs = cv2.inRange(hsv, lower, upper)
+        
+        # Remove noise
+        k = 3
+        kernel = np.ones((k,k),np.uint8)
+        blobs = cv2.morphologyEx(blobs, cv2.MORPH_OPEN, kernel)
+        
+        # Close the holes
+        k = 3
+        kernel = np.ones((k,k),np.uint8)
+        blobs = cv2.morphologyEx(blobs, cv2.MORPH_CLOSE, kernel)
+        
+        # Invert black and white
+        blobs = cv2.bitwise_not(blobs)    
+        
+        return blobs
+        
+    def getKeyPoints(self,blob):
+        # Setup SimpleBlobDetector parameters.
+        params = cv2.SimpleBlobDetector_Params()
+        
+        #params.minThreshold = 10;
+        #params.maxThreshold = 200;
+        #params.filterByArea = True
+        #params.minArea = 1500
+        params.filterByCircularity = False
+        #params.minCircularity = 0.1
+        params.filterByConvexity = False
+        #params.minConvexity = 0.87
+        params.filterByInertia = False
+        #params.minInertiaRatio = 0.01
+         
+        # Create a detector with the parameters
+        ver = (cv2.__version__).split('.')
+        if int(ver[0]) < 3 :
+            detector = cv2.SimpleBlobDetector(params)
+        else : 
+            detector = cv2.SimpleBlobDetector_create(params)
+            
+        # Detect blobs.
+        return detector.detect(blob)
+
+    def order(self,keypoints):
+        pts = [k.pt for k in keypoints]    
+        rect = np.zeros((4, 2), dtype = "float32")
+
+        s = [x+y for (x,y) in pts]
+        rect[1] = pts[np.argmin(s)]
+        rect[2] = pts[np.argmax(s)]
+
+        d = [x-y for (x,y) in pts]
+        rect[3] = pts[np.argmin(d)]
+        rect[0] = pts[np.argmax(d)]
+
+        return rect
+        
+    def warp(self,img):
+        # Find the green stickers
+        blob = self.getBlobs(img)
+
+        # Calculate the key points
+        keypoints = self.getKeyPoints(blob)
+        
+        # Calculate the perspective transform
+        pts1 = order(keypoints)
+        pts2 = np.float32([[-28,22],[428,22],[-29,375],[426,373]])
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        
+        return cv2.warpPerspective(img,M,(400,400))
