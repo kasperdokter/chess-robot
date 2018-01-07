@@ -16,6 +16,12 @@ class Camera:
     # Time to wait before taking picture
     t = 0.5
 
+    # Color of dots
+    h = 55
+
+    # Threshold for piece detection
+    th = 30
+
     def save(self,name):
         """
             Saves all pictures to disk.
@@ -58,7 +64,7 @@ class Camera:
         diff = cv2.absdiff(self.L[-1],self.L[-2])
         
         # Transform the gray scale difference to black and white via thresholding
-        ret,thresh = cv2.threshold(diff,25,255,cv2.THRESH_BINARY)
+        ret,thresh = cv2.threshold(diff,self.th,255,cv2.THRESH_BINARY)
         
         self.show(thresh)
 
@@ -68,12 +74,13 @@ class Camera:
             for y in range(8):
                 mask = np.zeros((400,400), np.uint8)
                 cv2.rectangle(mask, (50*x,50*y), (50*(x+1),50*(y+1)), 255, -1)
-                m = cv2.mean(square, mask)
+                m = cv2.mean(thresh, mask)
+                print(x,y,m[0])
                 if (m[0] > 5):
                     squares.append((x,y))    
         
         if len(squares) > 2:
-            self.show(square)
+            self.show(thresh)
         
         return squares
         
@@ -160,9 +167,8 @@ class Camera:
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         
         # Define range of marker color in HSV
-        h = 79
-        lower = np.array([h-10,50,50])
-        upper = np.array([h+10,255,255])
+        lower = np.array([self.h-10,50,50])
+        upper = np.array([self.h+10,255,255])
         
         # Threshold the HSV image to get only marker colors
         blobs = cv2.inRange(hsv, lower, upper)
@@ -179,7 +185,7 @@ class Camera:
         
         # Invert black and white
         blobs = cv2.bitwise_not(blobs)    
-        
+        self.show(blobs)
         return blobs
         
     def getKeyPoints(self,blob):
@@ -229,7 +235,7 @@ class Camera:
         keypoints = self.getKeyPoints(blob)
         
         # Calculate the perspective transform
-        pts1 = order(keypoints)
+        pts1 = self.order(keypoints)
         pts2 = np.float32([[-28,22],[428,22],[-29,375],[426,373]])
         M = cv2.getPerspectiveTransform(pts1,pts2)
         

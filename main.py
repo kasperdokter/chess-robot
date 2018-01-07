@@ -13,12 +13,12 @@ try:
     G.new_game()
     
     while True:
-    
+
         # Take a picture.
         C.picture()
-    
+
         #Improve: detect when the user completed a move.
-        raw_input("move completed? ")
+        raw_input("Heb je een zet gedaan?")
         
         # Take a picture
         C.picture()
