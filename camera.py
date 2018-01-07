@@ -16,6 +16,10 @@ class Camera:
     # Time to wait before taking picture
     t = 0.5
     
+    def view(self):
+        self.show(self.L[0])
+        return
+
     def save(self,name):
         """
             Saves all pictures to disk.
@@ -28,7 +32,6 @@ class Camera:
         """
             Takes a picture, appends it to the list.
         """
-        print("Taking picture...")
         with picamera.PiCamera() as camera:
             rawCapture = picamera.array.PiRGBArray(camera)
             time.sleep(self.t)
@@ -37,19 +40,26 @@ class Camera:
             self.L.append(img)
         return
        
+    def show(self,img):
+        cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('image', 720,400)
+        cv2.imshow('image', img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        return
+
     def changes(self):
         """
             Computes a list of squares that changes between the last two images in the list.
         """
-       
-        print(cv2.__version__) 
+        
         # Convert to gray scale
-        img1, img2 = self.L[:2]
+        img1, img2 = self.L[-2:]
         img1_gray = cv2.cvtColor(img1,cv2.COLOR_BGR2GRAY)
         img2_gray = cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
-        
+
         # Initiate STAR detector
-        orb = cv2.ORB_create()
+        orb = cv2.ORB()
 
         # Find the keypoints and descriptors with ORB
         kp1, des1 = orb.detectAndCompute(img2_gray,None)
@@ -81,7 +91,7 @@ class Camera:
         img3_gray = cv2.warpPerspective(img2_gray, M, (cols, rows))
         
         # Blur the second image and the aligned version of the second image
-        k = 35
+        k = 5
         blur_img1 = cv2.blur(img1_gray,(k,k))
         blur_img3 = cv2.blur(img3_gray,(k,k))
         
@@ -89,32 +99,29 @@ class Camera:
         diff = cv2.absdiff(blur_img1,blur_img3)
         
         # Transform the gray scale difference to black and white via threshholding
-        ret,thresh = cv2.threshold(diff,50,255,cv2.THRESH_BINARY)
+        ret,thresh = cv2.threshold(diff,25,255,cv2.THRESH_BINARY)
 
-        pts1 = np.float32([[0,0],[800,0],[0,800],[800,800]])
-        pts2 = np.float32([[65,500],[680,500],[165,48],[580,40]])
+        # Warp the thresholded image onto a square
+        pts2 = np.float32([[0,0],[400,0],[0,400],[400,400]])
+        pts1 = np.float32([[595,20],[145,13],[600,500],[115,485]])
         M = cv2.getPerspectiveTransform(pts1,pts2)
-        blank = np.zeros((800,800), np.uint8)
-        
-        #copy = img3_gray
-        #for x in range(8):
-        #    for y in range(8):
-        #        mask = cv2.rectangle(blank, (x,y), (100*(x+1),100*(y+1)), 255, 10) 
-        #        mask = cv2.warpPerspective(mask,M,(cols,rows))
-        #        mask = cv2.bitwise_not(mask)
-        #        copy = cv2.bitwise_and(mask, copy)        
-        #show(copy)
-        
+        square = cv2.warpPerspective(thresh,M,(400,400))
+        sq1 = cv2.warpPerspective(img2_gray,M,(400,400))	
+
+        self.show(sq1)
+        #self.show(square)
+
         # Iterate over the usual locations of the squares to find what changed
         squares = []
         for x in range(8):
             for y in range(8):
-                del mask
-                mask = np.zeros((800,800), np.uint8)
-                mask = cv2.rectangle(mask, (100*x,100*y), (100*(x+1),100*(y+1)), 255, -1) 
-                mask = cv2.warpPerspective(mask,M,(cols,rows))
-                m = cv2.mean(thresh, mask)
+                mask = np.zeros((400,400), np.uint8)
+                cv2.rectangle(mask, (50*x,50*y), (50*(x+1),50*(y+1)), 255, -1)
+                m = cv2.mean(square, mask)
                 if (m[0] > 5):
-                    squares.append((7-x,y))    
+                    squares.append((x,y))    
+        
+        if len(squares) > 2:
+            self.show(square)
         
         return squares

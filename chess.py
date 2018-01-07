@@ -200,15 +200,17 @@ class Game:
         
         return
                 
-    def find_move(squares):
+    def find_move(self,squares):
         """
             Find the move from a list of squares that changed.
         """
+        s1 = "a1"
+        s2 = "a1"
         for (x,y) in squares:
-            if G.position.has_key(G.c2a(x,y)):
-                s1 = G.c2a(x,y)
+            if self.position.has_key(self.c2a(x,y)):
+                s1 = self.c2a(x,y)
             else:
-                s2 = G.c2a(x,y)
+                s2 = self.c2a(x,y)
         return s1 + s2
                 
     def a2c(self,s):

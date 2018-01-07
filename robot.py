@@ -38,7 +38,7 @@ class Robot:
     du = 0.01  # less time to open grabber
 
     # initial position
-    x0, y0 = (2, 8)
+    x0, y0 = (1, 8)
 
     # current position
     xc, yc = (x0, y0)

@@ -17,19 +17,22 @@ try:
         # Take a picture.
         C.picture()
     
-        # Improve: detect when the user completed a move.
-        m1 = raw_input("> ")
+        #Improve: detect when the user completed a move.
+        raw_input("move completed? ")
         
-        if m1 == "":
-            # Take a picture
-            C.picture()
+        # Take a picture
+        C.picture()
         
-            # Get all squares that changed since the previous move.
-            #squares = C.changes()
+        # Get all squares that changed since the previous move.
+        squares = C.changes()
         
-            # Use the current position to determine what move is played.
-            #print(G.find_move(squares))
-        
+        # Use the current position to determine what move is played.
+        f = G.find_move(squares)
+        if raw_input("Is " + f + " gespeeld? [J/n]") == "n":
+            m1 = raw_input("voer de gespeelde zet in: ")
+        else:
+            m1 = f
+            
         # Execute the move on the internal board.
         G.move(m1)
 
