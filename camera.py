@@ -10,6 +10,9 @@ import numpy as np
 
 class Camera:
     
+    # Show
+    s = True
+
     # List of pictures
     L = []
 
@@ -17,17 +20,20 @@ class Camera:
     t = 0.5
 
     # Color of dots
-    h = 55
+    h = 50
 
-    # Threshold for piece detection
-    th = 30
+    # Threshold for difference
+    td = 15
+
+    # Threshold for mean
+    tm = 10
 
     def save(self,name):
         """
             Saves all pictures to disk.
         """
         for k, img in enumerate(self.L):
-            cv2.imwrite(name + format(k, '03') + ".jpg", cv2.cvtColor(img,cv2.COLOR_BGR2RGB))
+            cv2.imwrite(name + format(k, '03') + ".jpg", img)
         return
         
     def picture(self):
@@ -39,11 +45,13 @@ class Camera:
             time.sleep(self.t)
             camera.capture(rawCapture, format='bgr')
             img = rawCapture.array
-            self.show(img)
+            if self.s:
+                self.show(img)
             warp = self.warp(img)
             gray = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY)
             blur = cv2.blur(gray,(5,5))
-            self.show(blur)
+            if self.s:
+                self.show(blur)
             self.L.append(blur)
         return
        
@@ -64,9 +72,10 @@ class Camera:
         diff = cv2.absdiff(self.L[-1],self.L[-2])
         
         # Transform the gray scale difference to black and white via thresholding
-        ret,thresh = cv2.threshold(diff,self.th,255,cv2.THRESH_BINARY)
+        ret,thresh = cv2.threshold(diff,self.td,255,cv2.THRESH_BINARY)
         
-        self.show(thresh)
+        if self.s:
+            self.show(thresh)
 
         # Iterate over the usual locations of the squares to find what changed
         squares = []
@@ -75,12 +84,12 @@ class Camera:
                 mask = np.zeros((400,400), np.uint8)
                 cv2.rectangle(mask, (50*x,50*y), (50*(x+1),50*(y+1)), 255, -1)
                 m = cv2.mean(thresh, mask)
-                print(x,y,m[0])
-                if (m[0] > 5):
+                #print(x,y,m[0])
+                if (m[0] > self.tm):
                     squares.append((x,y))    
         
-        if len(squares) > 2:
-            self.show(thresh)
+        #if len(squares) > 2:
+        #    self.show(thresh)
         
         return squares
         
@@ -185,7 +194,8 @@ class Camera:
         
         # Invert black and white
         blobs = cv2.bitwise_not(blobs)    
-        self.show(blobs)
+        if self.s:
+            self.show(blobs)
         return blobs
         
     def getKeyPoints(self,blob):

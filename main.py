@@ -8,31 +8,33 @@ R = robot.Robot()
 C = camera.Camera()          
 
 try:
-    print("De Schaakturk")
     G.skill_level = int(raw_input("Welk niveau wil je spelen [0..20]? "))
     G.new_game()
     
     while True:
 
+        print("Even wachten aub...")
+
         # Take a picture.
-        C.picture()
+        #C.picture()
 
         #Improve: detect when the user completed a move.
-        raw_input("Heb je een zet gedaan?")
+        raw_input("Speel een zet en geef enter.")
         
         # Take a picture
-        C.picture()
+        #C.picture()
         
         # Get all squares that changed since the previous move.
-        squares = C.changes()
+        #squares = C.changes()
         
         # Use the current position to determine what move is played.
-        f = G.find_move(squares)
-        if raw_input("Is " + f + " gespeeld? [J/n]") == "n":
-            m1 = raw_input("voer de gespeelde zet in: ")
-        else:
-            m1 = f
-            
+        #m1 = G.find_move(squares)
+        m1 = "a2a3"
+	a = raw_input("Heb je " + m1 +" gespeeld?")
+        if a != "":
+            m1 = a
+        print("> " + m1)
+                   
         # Execute the move on the internal board.
         G.move(m1)
 
@@ -49,6 +51,8 @@ try:
         G.move(m2)
 
         G.show()
+
+        C.s = False
 
 except KeyboardInterrupt:
     R.exit()

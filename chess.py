@@ -133,8 +133,12 @@ class Game:
         """
         s0 = m[:2]
         s1 = m[2:4]
+
+        castle = self.is_castle(m)
+        enpass = self.is_enpassant(m)
+
         if self.position.has_key(s0):
-            
+
             # Get the piece
             p = self.position[s0]
             
@@ -147,16 +151,16 @@ class Game:
             del self.position[s0]
             
             # For castling, move the rook
-            if self.is_castle(m):
+            if castle:
                 if s1[0] == "c":
-                    self.position["d" + m[1]]
+                    self.position["d" + m[1]] = "r"
                     del self.position["a" + m[1]]
                 else:
-                    self.position["f" + m[1]]
+                    self.position["f" + m[1]] = "r"
                     del self.position["h" + m[1]]
             
             # En passant capture
-            if self.is_enpassant(m):
+            if enpass:
                 del self.position[m[2]+m[1]]
             
         self.moves.append(m)
@@ -204,13 +208,27 @@ class Game:
         """
             Find the move from a list of squares that changed.
         """
+        sqrs = [self.c2a(x,y) for (x,y) in squares]
+        if set(sqrs) == set(["e1","f1","g1","h1"]):
+            return "e1g1"
+        if set(sqrs) == set(["a1","c1","d1","e1"]):
+            return "e1c1"
+        if set(sqrs) == set(["e8","f8","g8","h8"]):
+            return "e8g8"
+        if set(sqrs) == set(["a8","c8","d8","e8"]):
+            return "e8c8"
+
         s1 = "a1"
         s2 = "a1"
         for (x,y) in squares:
-            if self.position.has_key(self.c2a(x,y)):
-                s1 = self.c2a(x,y)
+            s = self.c2a(x,y)
+            if self.position.has_key(s):
+                if (len(self.moves) % 2 == 0) == self.position[s].islower():
+                    s1 = s
+                else:
+                    s2 = s
             else:
-                s2 = self.c2a(x,y)
+                s2 = s
         return s1 + s2
                 
     def a2c(self,s):
